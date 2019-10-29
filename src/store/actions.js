@@ -22,6 +22,7 @@
 import flatMapDeep from 'lodash/fp/flatMapDeep'
 import flatten from 'lodash/fp/flatten'
 import flattenDepth from 'lodash/fp/flattenDepth'
+import identity from 'lodash/fp/identity'
 import isEmpty from 'lodash/fp/isEmpty'
 import last from 'lodash/fp/last'
 import orderBy from 'lodash/fp/orderBy'
@@ -40,6 +41,7 @@ import {
 } from '../service/AccountService'
 import {fetchAll as fetchAllFolders, create as createFolder, markFolderRead} from '../service/FolderService'
 import {deleteMessage, fetchEnvelopes, fetchMessage, setEnvelopeFlag, syncEnvelopes} from '../service/MessageService'
+import logger from '../logger'
 import {showNewMessagesNotification} from '../service/NotificationService'
 import {parseUid} from '../util/EnvelopeUidParser'
 
@@ -66,9 +68,8 @@ export default {
 	},
 	createAccount({commit}, config) {
 		return createAccount(config).then(account => {
-			console.debug('account created, fetching folders …', account)
-
-			fetchAllFolders(account.id)
+			logger.debug(`account ${account.id} created, fetching folders …`, account)
+			return fetchAllFolders(account.id)
 				.then(folders => {
 					account.folders = folders
 					commit('addAccount', account)
@@ -100,15 +101,10 @@ export default {
 		})
 	},
 	deleteAccount({commit}, account) {
-		return deleteAccount(account.id)
-			.then(account => {
-				console.debug('account deleted')
-				location.reload() // TODO: better handling of this
-			})
-			.catch(err => {
-				console.error('could not delete account', err)
-				throw err
-			})
+		return deleteAccount(account.id).catch(err => {
+			console.error('could not delete account', err)
+			throw err
+		})
 	},
 	createFolder({commit}, {account, name}) {
 		return createFolder(account.id, name).then(folder => {
@@ -399,7 +395,7 @@ export default {
 					)
 				})
 		).then(results => {
-			const newMessages = flatMapDeep(results).filter(m => m !== undefined)
+			const newMessages = flatMapDeep(identity)(results).filter(m => m !== undefined)
 			if (newMessages.length > 0) {
 				showNewMessagesNotification(newMessages)
 			}

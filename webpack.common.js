@@ -18,26 +18,20 @@ if (process.env.BUNDLE_ANALYZER_TOKEN) {
 }
 
 module.exports = {
-	entry: path.join(__dirname, 'src/main.js'),
+	entry: {
+		autoredirect: path.join(__dirname, 'src/autoredirect.js'),
+		mail: path.join(__dirname, 'src/main.js')
+	},
 	output: {
 		path: path.resolve(__dirname, 'js'),
 		chunkFilename: 'mail.[name].[contenthash].js',
 		publicPath: '/js/',
-		filename: 'mail.js'
 	},
 	node: {
 		fs: 'empty'
 	},
 	module: {
 		rules: [
-			{
-				test: /davclient/,
-				use: 'exports-loader?dav'
-			},
-			{
-				test: /ical/,
-				use: 'exports-loader?ICAL'
-			},
 			{
 				test: /\.css$/,
 				use: ['vue-style-loader', 'css-loader']

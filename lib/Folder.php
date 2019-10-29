@@ -48,8 +48,6 @@ class Folder implements JsonSerializable {
 	private $specialUse;
 
 	/** @var string */
-	private $displayName;
-
 	/**
 	 * @param Account $account
 	 * @param Horde_Imap_Client_Mailbox $mailbox
@@ -64,7 +62,6 @@ class Folder implements JsonSerializable {
 		$this->folders = [];
 		$this->status = [];
 		$this->specialUse = [];
-		$this->displayName = '';
 	}
 
 	/**
@@ -117,20 +114,6 @@ class Folder implements JsonSerializable {
 	}
 
 	/**
-	 * @return string
-	 */
-	public function getDisplayName() {
-		return $this->displayName;
-	}
-
-	/**
-	 * @param string $displayName
-	 */
-	public function setDisplayName($displayName) {
-		$this->displayName = $displayName;
-	}
-
-	/**
 	 * @return Folder[]
 	 */
 	public function getFolders() {
@@ -155,7 +138,7 @@ class Folder implements JsonSerializable {
 		return [
 			'id' => base64_encode($this->getMailbox()),
 			'accountId' => $this->accountId,
-			'name' => $this->getDisplayName(),
+			'displayName' => $this->getMailbox(),
 			'unseen' => isset($this->status['unseen']) ? $this->status['unseen'] : 0,
 			'total' => isset($this->status['messages']) ? (int) $this->status['messages'] : 0,
 			'isEmpty' => isset($this->status['messages']) ? 0 >= (int) $this->status['messages'] : true,

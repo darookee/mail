@@ -20,32 +20,40 @@
   -->
 
 <template>
-	<div>
-		<h3>{{ t('mail', 'Signature') }}</h3>
-		<p>
-			{{ t('mail', 'A signature will be added to the text of new and response messages.') }}
+	<div class="section">
+		<h2>{{ t('mail', 'Signature') }}</h2>
+		<p class="settings-hint">
+			{{ t('mail', 'A signature is added to the text of new messages and replies.') }}
 		</p>
 		<p>
-			<textarea v-model="signature" :disabled="loading"></textarea>
+			<TextEditor v-model="signature" :html="true" :placeholder="t('mail', 'Signature …')" />
 		</p>
 		<p>
-			<input type="submit" :value="t('mail', 'Delete')" :disabled="loading" @click="deleteSignature" />
-			<input
-				type="submit"
+			<button
 				class="primary"
-				:value="t('mail', 'Save')"
+				:class="loading ? 'icon-loading-small-dark' : 'icon-checkmark-white'"
 				:disabled="loading"
 				@click="saveSignature"
-			/>
+			>
+				{{ t('mail', 'Save signature') }}
+			</button>
+			<button v-if="signature" class="button-text" @click="deleteSignature">
+				{{ t('mail', 'Delete') }}
+			</button>
 		</p>
 	</div>
 </template>
 
 <script>
-import Logger from '../logger'
+import logger from '../logger'
+import TextEditor from './TextEditor'
+import {textToSimpleHtml} from '../util/HtmlHelper'
 
 export default {
 	name: 'SignatureSettings',
+	components: {
+		TextEditor,
+	},
 	props: {
 		account: {
 			type: Object,
@@ -53,9 +61,17 @@ export default {
 		},
 	},
 	data() {
+		let signature = this.account.signature || ''
+
+		if ((signature.includes('\n') || signature.includes('\r')) && !signature.includes('>')) {
+			// Looks like a plain text signature -> convert to HTML
+			signature = textToSimpleHtml(signature)
+			logger.info('Converted plain text signature to HTML')
+		}
+
 		return {
 			loading: false,
-			signature: this.account.signature,
+			signature,
 		}
 	},
 	methods: {
@@ -65,12 +81,12 @@ export default {
 			this.$store
 				.dispatch('updateAccountSignature', {account: this.account, signature: null})
 				.then(() => {
-					Logger.info('signature deleted')
+					logger.info('signature deleted')
 					this.signature = ''
 					this.loading = false
 				})
 				.catch(error => {
-					Logger.error('could not delete account signature', {error})
+					logger.error('could not delete account signature', {error})
 					throw error
 				})
 		},
@@ -80,14 +96,51 @@ export default {
 			this.$store
 				.dispatch('updateAccountSignature', {account: this.account, signature: this.signature})
 				.then(() => {
-					Logger.info('signature updated')
+					logger.info('signature updated')
 					this.loading = false
 				})
 				.catch(error => {
-					Logger.error('could not update account signature', {error})
+					logger.error('could not update account signature', {error})
 					throw error
 				})
 		},
 	},
 }
 </script>
+
+<style lang="scss" scoped>
+.settings-hint {
+	margin-top: -12px;
+	margin-bottom: 6px;
+	color: var(--color-text-maxcontrast);
+}
+
+textarea {
+	display: block;
+	width: 400px;
+	max-width: 85vw;
+	height: 100px;
+	resize: none;
+}
+
+.primary {
+	padding-left: 26px;
+	background-position: 6px;
+
+	&:after {
+		left: 14px;
+	}
+}
+
+.button-text {
+	background-color: transparent;
+	border: none;
+	color: var(--color-text-maxcontrast);
+	font-weight: normal;
+
+	&:hover,
+	&:focus {
+		color: var(--color-main-text);
+	}
+}
+</style>

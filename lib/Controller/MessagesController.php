@@ -88,9 +88,6 @@ class MessagesController extends Controller {
 	/** @var IURLGenerator */
 	private $urlGenerator;
 
-	/** @var ITimeFactory */
-	private $timeFactory;
-
 	/**
 	 * @param string $appName
 	 * @param IRequest $request
@@ -101,7 +98,6 @@ class MessagesController extends Controller {
 	 * @param IL10N $l10n
 	 * @param IMimeTypeDetector $mimeTypeDetector
 	 * @param IURLGenerator $urlGenerator
-	 * @param ITimeFactory $timeFactory
 	 */
 	public function __construct(string $appName,
 								IRequest $request,
@@ -114,8 +110,7 @@ class MessagesController extends Controller {
 								ILogger $logger,
 								IL10N $l10n,
 								IMimeTypeDetector $mimeTypeDetector,
-								IURLGenerator $urlGenerator,
-								ITimeFactory $timeFactory) {
+								IURLGenerator $urlGenerator) {
 		parent::__construct($appName, $request);
 
 		$this->accountService = $accountService;
@@ -128,7 +123,7 @@ class MessagesController extends Controller {
 		$this->l10n = $l10n;
 		$this->mimeTypeDetector = $mimeTypeDetector;
 		$this->urlGenerator = $urlGenerator;
-		$this->timeFactory = $timeFactory;
+		$this->mailManager = $mailManager;
 	}
 
 	/**
@@ -267,8 +262,7 @@ class MessagesController extends Controller {
 			$htmlResponse->setContentSecurityPolicy($policy);
 
 			// Enable caching
-			$htmlResponse->setCacheHeaders(60 * 60, $this->timeFactory);
-			$htmlResponse->addHeader('Pragma', 'cache');
+			$htmlResponse->cacheFor(60 * 60);
 
 			return $htmlResponse;
 		} catch (Exception $ex) {

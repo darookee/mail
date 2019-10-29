@@ -28,10 +28,10 @@
 			<Moment :timestamp="data.dateInt" />
 		</div>
 		<Actions class="app-content-list-item-menu" menu-align="right">
-			<ActionButton icon="icon-mail" @click="onToggleSeen">{{
+			<ActionButton icon="icon-mail" @click.prevent="onToggleSeen">{{
 				data.flags.unseen ? t('mail', 'Mark read') : t('mail', 'Mark unread')
 			}}</ActionButton>
-			<ActionButton icon="icon-delete" @click="onDelete">{{ t('mail', 'Delete') }}</ActionButton>
+			<ActionButton icon="icon-delete" @click.prevent="onDelete">{{ t('mail', 'Delete') }}</ActionButton>
 		</Actions>
 	</router-link>
 </template>
@@ -102,7 +102,7 @@ export default {
 				let recipients = [this.data.to, this.data.cc].flat().map(function(recipient) {
 					return recipient.label ? recipient.label : recipient.email
 				})
-				return recipients.length > 0 ? recipients.join(', ') : t('mail', 'BCC recipients only')
+				return recipients.length > 0 ? recipients.join(', ') : t('mail', 'Blind copy recipients only')
 			}
 			// Show sender label/address in other folder types
 			return this.data.from.length === 0 ? '?' : this.data.from[0].label || this.data.from[0].email
@@ -133,7 +133,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .mail-message-account-color {
 	position: absolute;
 	left: 0px;
@@ -164,5 +164,16 @@ export default {
 .icon-attachment {
 	-ms-filter: 'progid:DXImageTransform.Microsoft.Alpha(Opacity=25)';
 	opacity: 0.25;
+}
+
+// Fix layout of messages in list until we move to component
+
+.app-content-list-item-line-two,
+.app-content-list-item-menu {
+	margin-top: -8px;
+}
+
+.app-content-list-item-menu {
+	margin-right: -2px;
 }
 </style>

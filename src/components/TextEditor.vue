@@ -34,6 +34,7 @@
 import CKEditor from '@ckeditor/ckeditor5-vue'
 import Editor from '@ckeditor/ckeditor5-editor-balloon/src/ballooneditor'
 import EssentialsPlugin from '@ckeditor/ckeditor5-essentials/src/essentials'
+import BlockQuotePlugin from '@ckeditor/ckeditor5-block-quote/src/blockquote'
 import BoldPlugin from '@ckeditor/ckeditor5-basic-styles/src/bold'
 import ItalicPlugin from '@ckeditor/ckeditor5-basic-styles/src/italic'
 import LinkPlugin from '@ckeditor/ckeditor5-link/src/link'
@@ -57,18 +58,23 @@ export default {
 			type: Boolean,
 			default: false,
 		},
+		placeholder: {
+			type: String,
+			default: '',
+		},
 	},
 	data() {
 		return {
-			text: this.value,
+			text: '',
 			ready: false,
 			editor: Editor,
 			config: {
+				placeholder: this.placeholder,
 				plugins: this.html
-					? [EssentialsPlugin, ParagraphPlugin, BoldPlugin, ItalicPlugin, LinkPlugin]
+					? [EssentialsPlugin, ParagraphPlugin, BoldPlugin, ItalicPlugin, LinkPlugin, BlockQuotePlugin]
 					: [EssentialsPlugin, ParagraphPlugin],
 				toolbar: {
-					items: this.html ? ['bold', 'italic', 'link', 'undo', 'redo'] : ['undo', 'redo'],
+					items: this.html ? ['bold', 'italic', 'blockquote', 'link', 'undo', 'redo'] : ['undo', 'redo'],
 				},
 				language: 'en',
 			},
@@ -102,14 +108,43 @@ export default {
 
 			this.ready = true
 		},
-		onEditorReady() {
-			this.bodyVal = htmlToText(this.bodyVal)
+		onEditorReady(editor) {
+			const schema = editor.model.schema
+
+			schema.on(
+				'checkChild',
+				(evt, args) => {
+					const context = args[0]
+
+					if (context.endsWith('blockQuote')) {
+						// Prevent next listeners from being called.
+						evt.stop()
+						// Set the checkChild()'s return value.
+						evt.return = true
+					}
+				},
+				{
+					priority: 'highest',
+				}
+			)
+
+			// Set value as late as possible, so the custom schema listener is used
+			// for the initial editor model
+			if (this.html) {
+				this.text = this.value
+			} else {
+				this.text = `<p>${htmlToText(this.value).replace(/[\n\r]/gm, '<br>')}</p>`
+			}
 		},
 		onInput() {
-			this.$emit('input', this.html ? this.text : htmlToText(this.text))
+			this.$emit('input', this.text)
 		},
 	},
 }
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+::v-deep p {
+	cursor: text;
+}
+</style>

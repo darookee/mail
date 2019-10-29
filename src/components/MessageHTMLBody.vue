@@ -17,6 +17,8 @@
 import PrintScout from 'printscout'
 const scout = new PrintScout()
 
+import logger from '../logger'
+
 export default {
 	name: 'MessageHTMLBody',
 	props: {
@@ -51,7 +53,6 @@ export default {
 				iframeDoc.querySelectorAll('[data-original-src]').length > 0 ||
 				iframeDoc.querySelectorAll('[data-original-style]').length > 0
 
-			this.$emit('loaded', iframeBody.outerHTML)
 			this.loading = false
 		},
 		onAfterPrint() {
@@ -62,9 +63,11 @@ export default {
 		},
 		onShowBlockedContent() {
 			const iframeDoc = this.getIframeDoc()
-			iframeDoc
-				.querySelectorAll('[data-original-src]')
-				.forEach(node => node.setAttribute('src', node.getAttribute('data-original-src')))
+			logger.debug('showing external images')
+			iframeDoc.querySelectorAll('[data-original-src]').forEach(node => {
+				node.style.display = null
+				node.setAttribute('src', node.getAttribute('data-original-src'))
+			})
 			iframeDoc
 				.querySelectorAll('[data-original-style]')
 				.forEach(node => node.setAttribute('style', node.getAttribute('data-original-style')))
@@ -75,7 +78,16 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+// account for 8px margin on iframe body
+#mail-content {
+	margin-left: 30px;
+	margin-top: 2px;
+}
+#mail-message-has-blocked-content {
+	margin-left: 8px;
+}
+
 #message-container {
 	position: relative;
 	width: 100%;

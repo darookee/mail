@@ -23,8 +23,6 @@
     "Save" : "Зачувај",
     "Connect" : "Поврзи се",
     "Add mail account" : "Додади е-пошта сметка",
-    "from" : "од",
-    "to" : "до",
     "Subject" : "Наслов",
     "Sending …" : "Испраќам ...",
     "Go back" : "Назад",
@@ -57,9 +55,7 @@
     "Show all folders" : "Прикажи ги сите папки",
     "Collapse folders" : "Сокриј ги папките",
     "Mark all as read" : "Означи ги сите како прочитани",
-    "Mark all messages of this folder as read" : "Означи ги сите пораки во оваа папка како прочитани",
     "Add subfolder" : "Додади подпапка",
-    "{total} messages ({unread} unread)" : "{total} пораки ({unread} непрочитани)",
     "{from}\n{subject}" : "{from}\n{subject}"
 },"pluralForm" :"nplurals=2; plural=(n % 10 == 1 && n % 100 != 11) ? 0 : 1;"
 }
